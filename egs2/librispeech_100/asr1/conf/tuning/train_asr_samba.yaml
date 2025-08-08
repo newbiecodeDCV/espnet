@@ -1,0 +1,134 @@
+model_conf:
+    encoder: samba_asr
+    encoder_conf:
+        output_size: 768          # d_model from paper
+        num_layers: 12            # Number of Mamba blocks
+        d_state: 16              # SSM state dimension
+        d_conv: 4                # Convolution kernel size
+        expand: 2                # Expansion factor
+        dropout_rate: 0.1
+        input_layer: conv2d      # Convolutional input processing
+        pos_enc_layer_type: abs_pos
+        normalize_before: true
+
+    # Samba decoder with cross-attention
+    decoder: samba_asr_decoder
+    decoder_conf:
+        num_blocks: 6            # Number of decoder Mamba blocks
+        d_state: 16              # SSM state dimension
+        d_conv: 4                # Convolution kernel size
+        expand: 2                # Expansion factor
+        dropout_rate: 0.1
+        positional_dropout_rate: 0.1
+        normalize_before: true
+        use_output_layer: true
+
+    # CTC head for joint training
+    ctc_conf:
+        dropout_rate: 0.1
+        ctc_type: builtin
+        reduce: true
+
+    # Joint CTC-attention training (as commonly used in ASR)
+    mtlalpha: 0.3              # CTC weight
+    lsm_weight: 0.1            # Label smoothing weight
+
+# Frontend processing (Mel spectrogram)
+frontend: default
+frontend_conf:
+    n_fft: 512
+    win_length: 400
+    hop_length: 160
+    n_mels: 80
+    fmin: 0
+    fmax: 8000
+
+# Preprocessing
+preprocess_conf:
+    # Apply log mel spectrogram as mentioned in paper
+    input_type: raw
+    output_type: raw
+
+# Optimization following paper settings
+optim: adamw                   # AdamW optimizer as used in paper
+optim_conf:
+    lr: 0.0001                 # Learning rate from paper (1e-4)
+    betas: [0.9, 0.999]
+    eps: 1.0e-08              # Adam epsilon from paper
+    weight_decay: 0.01        # Weight decay from paper
+
+# Learning rate scheduler
+scheduler: linearlr
+scheduler_conf:
+    start_lr: 0.0001
+    end_lr: 0.00001
+    num_epochs: 80            # 80 epochs as mentioned in paper
+
+# Training configuration
+batch_type: numel
+batch_bins: 5000000          # Adjust based on GPU memory
+accum_grad: 1                # Gradient accumulation
+grad_clip: 1.0               # Gradient clipping
+grad_noise: false
+sort_in_batch: descending
+sort_batch: descending
+max_epoch: 80                # From paper training details
+
+# Data augmentation following best practices
+specaug: specaug
+specaug_conf:
+    apply_time_warp: true
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    num_freq_mask: 2
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 40
+    num_time_mask: 2
+
+# Dataset configuration for training
+dataset_conf:
+    # Batch size from paper
+    batch_size: 256            # Batch size from paper
+
+# Validation and saving
+num_workers: 4
+log_interval: 100
+keep_nbest_models: 10
+nbest_averaging_interval: 0
+
+# Token type
+token_type: char              # Character-level tokenization
+bpemodel: null
+
+# Required for ESPnet2
+required:
+    - output_dir
+    - token_list
+
+# Additional training settings
+patience: null
+early_stopping_criterion: validation
+best_model_criterion:
+- - valid
+  - acc
+  - max
+val_scheduler_criterion:
+- - valid
+  - loss
+  - min
+
+# Mixed precision training for efficiency
+use_amp: true
+cudnn_benchmark: true
+cudnn_deterministic: false
+
+# For reproducibility
+seed: 777
+num_iters_per_epoch: null
+log_level: INFO
