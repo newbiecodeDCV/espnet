@@ -163,7 +163,7 @@ class CTC(torch.nn.Module):
         ys_hat = self.ctc_lo(F.dropout(hs_pad, p=self.dropout_rate))
 
         if self.ctc_type == "brctc":
-            loss = self.loss_fn(ys_hat, ys_pad, hlens, ys_lens).to(
+            loss = self.loss_fn(ys_hat, ys_pad, hlens.long(), ys_lens).to(
                 device=hs_pad.device, dtype=hs_pad.dtype
             )
             return loss
