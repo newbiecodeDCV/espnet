@@ -42,7 +42,7 @@ from espnet2.asr.encoder.hubert_encoder import (
     FairseqHubertPretrainEncoder,
     TorchAudioHuBERTPretrainEncoder,
 )
-from espnet2.asr.encoder.Samba_encoder import   SambaEncoder
+from espnet2.asr.encoder.Samba_encoder import SambaASREncoder
 from espnet2.asr.encoder.longformer_encoder import LongformerEncoder
 from espnet2.asr.encoder.multiconvformer_encoder import MultiConvConformerEncoder
 from espnet2.asr.encoder.rnn_encoder import RNNEncoder
