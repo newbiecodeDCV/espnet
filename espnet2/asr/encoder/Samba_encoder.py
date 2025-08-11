@@ -127,6 +127,9 @@ class MambaBlock(nn.Module):
         else:
             x = self.sequential_scan(deltaA, deltaB_u)
 
+        print(f"x shape: {x.shape}")  # Expect (B, L, d_inner, d_state)
+        print(f"C shape: {C.shape}")  # Expect (B, L, d_state)
+
         # Compute output
         y = torch.einsum('blnd,bln->bld', x, C)
         y = y + u * D
