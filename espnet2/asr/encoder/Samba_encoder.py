@@ -131,7 +131,7 @@ class MambaBlock(nn.Module):
         print(f"C shape: {C.shape}")  # Expect (B, L, d_state)
 
         # Compute output
-        y = torch.einsum('blnd, bld -> bld', x, C)
+        y = torch.einsum('blnd,bld->bld', x, C)
         y = y + u * D
 
         return y
