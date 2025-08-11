@@ -257,7 +257,7 @@ class SambaASRDecoder(AbsDecoder):
 
 
 # Import MambaBlock from encoder file
-from .samba_encoder import MambaBlock  # Adjust import path as needed
+from ..encoder.Samba_encoder import MambaBlock  # Adjust import path as needed
 
 
 class PositionalEncoding(nn.Module):
