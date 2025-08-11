@@ -7,7 +7,7 @@ set -o pipefail
 
 train_set="train_clean_100"
 valid_set="dev"
-test_sets="test_clean "
+test_sets="test_clean"
 
 asr_config=conf/tuning/train_asr_samba.yaml
 

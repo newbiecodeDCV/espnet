@@ -44,10 +44,6 @@ frontend_conf:
     fmax: 8000
 
 # Preprocessing
-preprocess_conf:
-    # Apply log mel spectrogram as mentioned in paper
-    input_type: raw
-    output_type: raw
 
 # Optimization following paper settings
 optim: adamw                   # AdamW optimizer as used in paper

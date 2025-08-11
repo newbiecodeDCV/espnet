@@ -23,6 +23,7 @@ from espnet2.asr.decoder.transformer_decoder import (
     LightweightConvolutionTransformerDecoder,
     TransformerDecoder,
 )
+from espnet2.asr.decoder.Samba_decoder import SambaASRDecoder
 from espnet2.asr.decoder.whisper_decoder import OpenAIWhisperDecoder
 from espnet2.asr.encoder.abs_encoder import AbsEncoder
 from espnet2.asr.encoder.avhubert_encoder import FairseqAVHubertEncoder
@@ -41,6 +42,7 @@ from espnet2.asr.encoder.hubert_encoder import (
     FairseqHubertPretrainEncoder,
     TorchAudioHuBERTPretrainEncoder,
 )
+from espnet2.asr.encoder.Samba_encoder import  import SambaEncoder
 from espnet2.asr.encoder.longformer_encoder import LongformerEncoder
 from espnet2.asr.encoder.multiconvformer_encoder import MultiConvConformerEncoder
 from espnet2.asr.encoder.rnn_encoder import RNNEncoder
@@ -168,6 +170,7 @@ encoder_choices = ClassChoices(
         avhubert=FairseqAVHubertEncoder,
         multiconv_conformer=MultiConvConformerEncoder,
         beats=BeatsEncoder,
+        samba_asr=SambaEncoder,
     ),
     type_check=AbsEncoder,
     default="rnn",
@@ -197,6 +200,7 @@ decoder_choices = ClassChoices(
         hugging_face_transformers=HuggingFaceTransformersDecoder,
         s4=S4Decoder,
         linear_decoder=LinearDecoder,
+        samba_asr_decoder=SambaASRDecoder,
         # This decoder is only meant for classification tasks.
         # TODO(shikhar): Move classification to cls1 task completely.
     ),
