@@ -185,7 +185,8 @@ class SambaASRDecoder(AbsDecoder):
             pred_lens: prediction lengths (B,)
         """
         batch_size, max_len = ys_in_pad.size()
-        hlens = torch.tensor(hlens) if isinstance(hlens, int) else hlens
+        if not torch.is_tensor(hlens):
+            hlens = torch.tensor(hlens)
         # Create encoder attention mask
         encoder_mask = make_pad_mask(hlens, hs_pad.size(1)).unsqueeze(1)
 
