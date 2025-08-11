@@ -170,7 +170,7 @@ encoder_choices = ClassChoices(
         avhubert=FairseqAVHubertEncoder,
         multiconv_conformer=MultiConvConformerEncoder,
         beats=BeatsEncoder,
-        samba_asr=SambaEncoder,
+        samba_asr=SambaASREncoder,
     ),
     type_check=AbsEncoder,
     default="rnn",
