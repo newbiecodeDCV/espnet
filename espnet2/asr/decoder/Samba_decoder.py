@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from typing import Tuple, Optional, List
 from espnet2.asr.decoder.abs_decoder import AbsDecoder
 from espnet.nets.pytorch_backend.nets_utils import make_pad_mask
-
+import math
 
 class MambaCrossBlock(nn.Module):
     """
