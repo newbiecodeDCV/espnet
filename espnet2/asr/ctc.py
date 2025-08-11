@@ -181,7 +181,7 @@ class CTC(torch.nn.Module):
         print("Target lengths:", ys_lens)
         print("Input lengths:", hlens)
 
-        loss = self.loss_fn(ys_hat, ys_true, hlens, ys_lens).to(
+        loss = self.loss_fn(ys_hat, ys_true, hlens.long(), ys_lens).to(
             device=hs_pad.device, dtype=hs_pad.dtype
         )
 
