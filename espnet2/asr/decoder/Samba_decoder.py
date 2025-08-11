@@ -189,6 +189,7 @@ class SambaASRDecoder(AbsDecoder):
             hlens = torch.tensor(hlens)
         # Create encoder attention mask
         encoder_mask = make_pad_mask(hlens, hs_pad.size(1)).unsqueeze(1)
+        print(f"Type of hlens: {type(hlens)}, hlens: {hlens}")
 
         # Create causal mask for decoder
         causal_mask = self.create_causal_mask(max_len, ys_in_pad.device)
