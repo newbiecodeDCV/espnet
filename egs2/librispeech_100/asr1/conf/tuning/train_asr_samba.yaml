@@ -61,7 +61,7 @@ scheduler_conf:
 
 # Training configuration
 batch_type: numel
-batch_bins: 5000000          # Adjust based on GPU memory
+batch_bins: 1000000          # Adjust based on GPU memory
 accum_grad: 1                # Gradient accumulation
 grad_clip: 1.0               # Gradient clipping
 grad_noise: false
