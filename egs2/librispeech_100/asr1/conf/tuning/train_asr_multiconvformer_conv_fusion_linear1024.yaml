@@ -1,4 +1,4 @@
-# ESPnet2 ASR Training Configuration - Samba ASR (loại bỏ tham số không hợp lệ)
+# ESPnet2 ASR Training Configuration - Samba ASR (sửa tham số không hợp lệ)
 
 # Samba ASR Encoder - giữ nguyên model
 encoder: samba_asr
@@ -24,7 +24,8 @@ model_conf:
     ctc_weight: 0.3
     lsm_weight: 0.1
 
-# Frontend - đơn giản hóa
+# Frontend - cần thêm frontend type
+frontend: default
 frontend_conf:
     n_fft: 512
     win_length: 400
@@ -62,10 +63,16 @@ specaug_conf:
     time_mask_width_range: [0, 40]
     num_time_mask: 2
 
-# Model selection
+# Model selection - sửa format
 best_model_criterion:
-- [valid, acc, max]
+    - valid
+    - acc
+    - max
 keep_nbest_models: 10
 
 # Token type - cần thiết
 token_type: char
+
+# Thêm các tham số bắt buộc tối thiểu
+model: espnet
+token_list: data/token_list/char/tokens.txt
