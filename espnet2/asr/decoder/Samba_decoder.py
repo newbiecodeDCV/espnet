@@ -186,7 +186,7 @@ class SambaASRDecoder(AbsDecoder):
         """
         batch_size, max_len = ys_in_pad.size()
         if not torch.is_tensor(hlens):
-            hlens = torch.tensor(hlens)
+            hlens = torch.tensor([hlens])
         # Create encoder attention mask
         encoder_mask = make_pad_mask(hlens, hs_pad.size(1)).unsqueeze(1)
         print(f"Type of hlens: {type(hlens)}, hlens: {hlens}")
