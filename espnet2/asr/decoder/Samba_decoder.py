@@ -185,8 +185,23 @@ class SambaASRDecoder(AbsDecoder):
             pred_lens: prediction lengths (B,)
         """
         batch_size, max_len = ys_in_pad.size()
-        if not torch.is_tensor(hlens):
-            hlens = torch.tensor([hlens])
+        print(f"Input shapes: hs_pad={hs_pad.shape}, ys_in_pad={ys_in_pad.shape}")
+        print(f"hlens type={type(hlens)}, value={hlens}")
+        print(f"batch_size={batch_size}")
+        if isinstance(hlens, int):
+            # Nếu là int, tạo tensor với đúng batch_size
+            hlens = torch.full((batch_size,), hlens,
+                               dtype=torch.long, device=hs_pad.device)
+        elif not torch.is_tensor(hlens):
+            # Nếu là list hoặc tuple
+            hlens = torch.tensor(hlens, dtype=torch.long, device=hs_pad.device)
+
+            # Đảm bảo hlens có đúng shape
+        if hlens.dim() == 0:
+            hlens = hlens.unsqueeze(0).repeat(batch_size)
+        elif hlens.size(0) != batch_size:
+            # Nếu size không khớp, lặp lại giá trị đầu tiên
+            hlens = hlens[0].unsqueeze(0).repeat(batch_size)
         # Create encoder attention mask
         encoder_mask = make_pad_mask(hlens, hs_pad.size(1)).unsqueeze(1)
         print(f"Type of hlens: {type(hlens)}, hlens: {hlens}")
@@ -246,7 +261,16 @@ class SambaASRDecoder(AbsDecoder):
         """
         # For simplicity, process full sequence each time
         # In practice, you'd implement incremental decoding with proper caching
+        if isinstance(hlens, int):
+            hlens = torch.full((batch_size,), hlens,
+                               dtype=torch.long, device=ys.device)
+        elif hlens is None:
+            hlens = torch.full((batch_size,), hs_pad.size(1),
+                               dtype=torch.long, device=ys.device)
 
+            # Tạo ys_in_lens đúng format
+        ys_in_lens = torch.full((batch_size,), ys.size(1),
+                                dtype=torch.long, device=ys.device)
         logits, _ = self.forward(hs_pad, hlens, ys, torch.LongTensor([ys.size(1)] * ys.size(0)))
 
         # Return logits for last position
