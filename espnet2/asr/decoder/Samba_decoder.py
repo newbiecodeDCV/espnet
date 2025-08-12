@@ -218,8 +218,19 @@ class SambaASRDecoder(AbsDecoder):
 
         print(f"Fixed hlens type={type(hlens)}, dtype={hlens.dtype}, value={hlens}")
 
-        # Create encoder attention mask - now hlens is correct format
-        encoder_mask = make_pad_mask(hlens, hs_pad.size(1)).unsqueeze(1)
+        # Create encoder attention mask - MANUAL CREATION to avoid make_pad_mask issues
+        device = hlens.device
+        max_len = hs_pad.size(1)
+        batch_size = hlens.size(0)
+
+        # Create padding mask: True for padded positions, False for valid positions
+        encoder_mask = torch.arange(max_len, device=device).expand(
+            batch_size, max_len
+        ) >= hlens.unsqueeze(1)
+        encoder_mask = encoder_mask.unsqueeze(1)  # Add attention head dimension
+
+        print(f"Manual encoder_mask shape: {encoder_mask.shape}")
+        print(f"Manual encoder_mask dtype: {encoder_mask.dtype}")
 
         # Create causal mask for decoder
         causal_mask = self.create_causal_mask(max_len, ys_in_pad.device)
