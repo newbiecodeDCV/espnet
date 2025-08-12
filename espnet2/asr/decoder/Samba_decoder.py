@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,6 +5,7 @@ from typing import Tuple, Optional, List
 from espnet2.asr.decoder.abs_decoder import AbsDecoder
 from espnet.nets.pytorch_backend.nets_utils import make_pad_mask
 import math
+
 
 class MambaCrossBlock(nn.Module):
     """
@@ -185,26 +185,41 @@ class SambaASRDecoder(AbsDecoder):
             pred_lens: prediction lengths (B,)
         """
         batch_size, max_len = ys_in_pad.size()
+
+        # Debug info
         print(f"Input shapes: hs_pad={hs_pad.shape}, ys_in_pad={ys_in_pad.shape}")
         print(f"hlens type={type(hlens)}, value={hlens}")
         print(f"batch_size={batch_size}")
+
+        # CRITICAL FIX: Ensure hlens is integer tensor
         if isinstance(hlens, int):
-            # Nếu là int, tạo tensor với đúng batch_size
+            # If hlens is int, create tensor with correct batch_size
             hlens = torch.full((batch_size,), hlens,
                                dtype=torch.long, device=hs_pad.device)
-        elif not torch.is_tensor(hlens):
-            # Nếu là list hoặc tuple
-            hlens = torch.tensor(hlens, dtype=torch.long, device=hs_pad.device)
+        elif torch.is_tensor(hlens):
+            # Convert float tensor to long tensor - THIS IS THE KEY FIX
+            hlens = hlens.long()
 
-            # Đảm bảo hlens có đúng shape
-        if hlens.dim() == 0:
-            hlens = hlens.unsqueeze(0).repeat(batch_size)
-        elif hlens.size(0) != batch_size:
-            # Nếu size không khớp, lặp lại giá trị đầu tiên
-            hlens = hlens[0].unsqueeze(0).repeat(batch_size)
-        # Create encoder attention mask
+            # Ensure correct shape
+            if hlens.dim() == 0:
+                hlens = hlens.unsqueeze(0).repeat(batch_size)
+            elif hlens.size(0) != batch_size:
+                # If size doesn't match, repeat first value
+                hlens = hlens[0].unsqueeze(0).repeat(batch_size)
+        else:
+            # If list or other iterable
+            hlens = torch.tensor(hlens, dtype=torch.long, device=hs_pad.device)
+            if hlens.size(0) != batch_size:
+                hlens = hlens[0].unsqueeze(0).repeat(batch_size)
+
+        # Double check: ensure hlens is long tensor
+        if hlens.dtype != torch.long:
+            hlens = hlens.long()
+
+        print(f"Fixed hlens type={type(hlens)}, dtype={hlens.dtype}, value={hlens}")
+
+        # Create encoder attention mask - now hlens is correct format
         encoder_mask = make_pad_mask(hlens, hs_pad.size(1)).unsqueeze(1)
-        print(f"Type of hlens: {type(hlens)}, hlens: {hlens}")
 
         # Create causal mask for decoder
         causal_mask = self.create_causal_mask(max_len, ys_in_pad.device)
@@ -259,19 +274,28 @@ class SambaASRDecoder(AbsDecoder):
             logits: next token logits (B, vocab_size)
             new_cache: updated cache
         """
-        # For simplicity, process full sequence each time
-        # In practice, you'd implement incremental decoding with proper caching
+        batch_size = ys.size(0)
+
+        # CRITICAL FIX: Ensure hlens is properly formatted
         if isinstance(hlens, int):
             hlens = torch.full((batch_size,), hlens,
                                dtype=torch.long, device=ys.device)
         elif hlens is None:
             hlens = torch.full((batch_size,), hs_pad.size(1),
                                dtype=torch.long, device=ys.device)
+        elif torch.is_tensor(hlens):
+            # Convert to long tensor - KEY FIX
+            hlens = hlens.long()
+            if hlens.dim() == 0:
+                hlens = hlens.unsqueeze(0).repeat(batch_size)
+            elif hlens.size(0) != batch_size:
+                hlens = hlens[0].unsqueeze(0).repeat(batch_size)
 
-            # Tạo ys_in_lens đúng format
+        # Create ys_in_lens with correct format
         ys_in_lens = torch.full((batch_size,), ys.size(1),
                                 dtype=torch.long, device=ys.device)
-        logits, _ = self.forward(hs_pad, hlens, ys, torch.LongTensor([ys.size(1)] * ys.size(0)))
+
+        logits, _ = self.forward(hs_pad, hlens, ys, ys_in_lens)
 
         # Return logits for last position
         return logits[:, -1, :], cache
