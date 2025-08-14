@@ -23,14 +23,13 @@ decoder_conf:
   use_output_layer: true
 
 # CTC head for joint training
-ctc_conf:
+model_conf:
   dropout_rate: 0.1
   ctc_type: builtin
   reduce: true
+  lsm_weight: 0.1
 
-# Joint CTC-attention training (as commonly used in ASR)
-mtlalpha: 0.3              # CTC weight
-lsm_weight: 0.1            # Label smoothing weight
+# Joint CTC-attention training (as commonly used in ASR)          # Label smoothing weight
 
 # Frontend processing (Mel spectrogram)
 frontend: default
