@@ -12,7 +12,7 @@ test_sets="test_clean"
 asr_config=conf/tuning/train_asr_samba.yaml
 
 
-./asr.sh \
+CUDA_VISIBLE_DEVICES=2./asr.sh \
     --lang en \
     --ngpu 1 \
     --nj 16 \
