@@ -24,9 +24,6 @@ decoder_conf:
 
 # CTC head for joint training
 model_conf:
-  dropout_rate: 0.1
-  ctc_type: builtin
-  reduce: true
   lsm_weight: 0.1
 
 # Joint CTC-attention training (as commonly used in ASR)          # Label smoothing weight
