@@ -81,7 +81,7 @@ class MambaBlock(nn.Module):
         """Initialize weights for stability"""
         # Initialize dt_proj with small values
         with torch.no_grad():
-            dt_init_std = self.dt_rank ** -0.5 * dt_scale
+            dt_init_std = self.dt_rank ** -0.5 * self.dt_scale
             if dt_init == "constant":
                 nn.init.constant_(self.dt_proj.weight, dt_init_std)
             elif dt_init == "random":
