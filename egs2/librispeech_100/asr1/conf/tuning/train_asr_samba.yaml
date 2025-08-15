@@ -47,7 +47,7 @@ scheduler_conf:
 
 # FIXED: Training configuration cho stability
 batch_type: numel
-batch_bins: 500000           # FIXED: Giảm batch size từ 1M -> 500k
+batch_bins: 1000000
 accum_grad: 2                # FIXED: Tăng gradient accumulation
 grad_clip: 0.5               # FIXED: Giảm grad clip từ 1.0 -> 0.5
 grad_noise: false
@@ -55,22 +55,22 @@ sort_in_batch: descending
 sort_batch: descending
 max_epoch: 80
 
-# FIXED: Tắt SpecAug ban đầu để test stability
-# specaug: specaug
-# specaug_conf:
-#   apply_time_warp: true
-#   time_warp_window: 5
-#   time_warp_mode: bicubic
-#   apply_freq_mask: true
-#   freq_mask_width_range:
-#     - 0
-#     - 30
-#   num_freq_mask: 2
-#   apply_time_mask: true
-#   time_mask_width_range:
-#     - 0
-#     - 40
-#   num_time_mask: 2
+
+specaug: specaug
+specaug_conf:
+   apply_time_warp: true
+   time_warp_window: 5
+   time_warp_mode: bicubic
+   apply_freq_mask: true
+   freq_mask_width_range:
+     - 0
+     - 30
+   num_freq_mask: 2
+   apply_time_mask: true
+   time_mask_width_range:
+     - 0
+     - 40
+   num_time_mask: 2
 
 num_workers: 4
 log_interval: 10             # FIXED: Tăng tần suất log để theo dõi
