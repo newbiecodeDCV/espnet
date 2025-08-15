@@ -49,11 +49,11 @@ optim_conf:
   weight_decay: 0.01        # Weight decay from paper
 
 # Learning rate scheduler
-scheduler: linearlr
+scheduler: piecewiselinearwarmuplr
 scheduler_conf:
-  start_lr: 0.0001
-  end_lr: 0.00001
-  num_epochs: 80            # 80 epochs as mentioned in paper
+    milestones:
+        0: 1.0     # epoch 0, LR scale = 1.0
+        100: 0.1   # epoch 100, LR scale = 0.1
 
 # Training configuration
 batch_type: numel
