@@ -1,34 +1,29 @@
 encoder: samba_asr
 encoder_conf:
-  output_size: 768          # d_model from paper
-  num_layers: 12            # Number of Mamba blocks
-  d_state: 16              # SSM state dimension
-  d_conv: 4                # Convolution kernel size
-  expand: 2                # Expansion factor
+  output_size: 512          # FIXED: Giảm từ 768 -> 512 để stability
+  num_layers: 6             # FIXED: Giảm từ 12 -> 6 layers ban đầu
+  d_state: 16
+  d_conv: 4
+  expand: 2
   dropout_rate: 0.1
-  input_layer: conv2d      # Convolutional input processing
+  input_layer: conv2d
   pos_enc_layer_type: abs_pos
   normalize_before: true
 
-# Samba decoder with cross-attention
 decoder: samba_asr_decoder
 decoder_conf:
-  num_blocks: 6            # Number of decoder Mamba blocks
-  d_state: 16              # SSM state dimension
-  d_conv: 4                # Convolution kernel size
-  expand: 2                # Expansion factor
+  num_blocks: 4            # FIXED: Giảm từ 6 -> 4 blocks
+  d_state: 16
+  d_conv: 4
+  expand: 2
   dropout_rate: 0.1
   positional_dropout_rate: 0.1
   normalize_before: true
   use_output_layer: true
 
-# CTC head for joint training
 model_conf:
   lsm_weight: 0.1
 
-# Joint CTC-attention training (as commonly used in ASR)          # Label smoothing weight
-
-# Frontend processing (Mel spectrogram)
 frontend: default
 frontend_conf:
   n_fft: 512
@@ -38,64 +33,53 @@ frontend_conf:
   fmin: 0
   fmax: 8000
 
-# Preprocessing
-
-# Optimization following paper settings
-optim: adamw                   # AdamW optimizer as used in paper
+# FIXED: Optimization settings cho stability
+optim: adamw
 optim_conf:
-  lr: 0.0001                 # Learning rate from paper (1e-4)
-  betas: [ 0.9, 0.999 ]
-  eps: 1.0e-08              # Adam epsilon from paper
-  weight_decay: 0.01        # Weight decay from paper
+  lr: 0.00005                # FIXED: Giảm LR từ 0.0001 -> 0.00005
+  betas: [ 0.9, 0.98 ]       # FIXED: Thay đổi beta2 từ 0.999 -> 0.98
+  eps: 1.0e-06               # FIXED: Tăng eps từ 1e-08 -> 1e-06
+  weight_decay: 0.01
 
-# Learning rate scheduler
-scheduler: piecewiselinearwarmuplr
+scheduler: warmuplr            # FIXED: Thay scheduler đơn giản hơn
+scheduler_conf:
+  warmup_steps: 1000
 
-
-
-# Training configuration
+# FIXED: Training configuration cho stability
 batch_type: numel
-batch_bins: 1000000          # Adjust based on GPU memory
-accum_grad: 1                # Gradient accumulation
-grad_clip: 1.0               # Gradient clipping
+batch_bins: 500000           # FIXED: Giảm batch size từ 1M -> 500k
+accum_grad: 2                # FIXED: Tăng gradient accumulation
+grad_clip: 0.5               # FIXED: Giảm grad clip từ 1.0 -> 0.5
 grad_noise: false
 sort_in_batch: descending
 sort_batch: descending
-max_epoch: 80                # From paper training details
+max_epoch: 80
 
-# Data augmentation following best practices
-specaug: specaug
-specaug_conf:
-  apply_time_warp: true
-  time_warp_window: 5
-  time_warp_mode: bicubic
-  apply_freq_mask: true
-  freq_mask_width_range:
-    - 0
-    - 30
-  num_freq_mask: 2
-  apply_time_mask: true
-  time_mask_width_range:
-    - 0
-    - 40
-  num_time_mask: 2
+# FIXED: Tắt SpecAug ban đầu để test stability
+# specaug: specaug
+# specaug_conf:
+#   apply_time_warp: true
+#   time_warp_window: 5
+#   time_warp_mode: bicubic
+#   apply_freq_mask: true
+#   freq_mask_width_range:
+#     - 0
+#     - 30
+#   num_freq_mask: 2
+#   apply_time_mask: true
+#   time_mask_width_range:
+#     - 0
+#     - 40
+#   num_time_mask: 2
 
-    # Dataset configuration for training
-  # Batch size from paper
-
-# Validation and saving
 num_workers: 4
-log_interval: 100
-keep_nbest_models: 10
+log_interval: 10             # FIXED: Tăng tần suất log để theo dõi
+keep_nbest_models: 5         # FIXED: Giảm số models keep
 nbest_averaging_interval: 0
 
-# Token type
-token_type: char              # Character-level tokenization
+token_type: char
 bpemodel: null
 
-#
-
-# Additional training settings
 patience: null
 early_stopping_criterion: validation
 best_model_criterion:
@@ -107,12 +91,11 @@ val_scheduler_criterion:
     - loss
     - min
 
-# Mixed precision training for efficiency
-use_amp: false
+# FIXED: Bật mixed precision với stability
+use_amp: true                # FIXED: Thử bật AMP với Samba
 cudnn_benchmark: false
-cudnn_deterministic: false
+cudnn_deterministic: true    # FIXED: Bật deterministic
 
-# For reproducibility
 seed: 777
 num_iters_per_epoch: null
 log_level: INFO
