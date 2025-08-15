@@ -50,10 +50,8 @@ optim_conf:
 
 # Learning rate scheduler
 scheduler: piecewiselinearwarmuplr
-scheduler_conf:
-    milestones:
-        0: 1.0     # epoch 0, LR scale = 1.0
-        100: 0.1   # epoch 100, LR scale = 0.1
+
+
 
 # Training configuration
 batch_type: numel
