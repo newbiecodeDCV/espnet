@@ -98,10 +98,7 @@ nbest_averaging_interval: 0
 token_type: char              # Character-level tokenization
 bpemodel: null
 
-# Required for ESPnet2
-required:
-  - output_dir
-  - token_list
+#
 
 # Additional training settings
 patience: null
@@ -116,8 +113,8 @@ val_scheduler_criterion:
     - min
 
 # Mixed precision training for efficiency
-use_amp: true
-cudnn_benchmark: true
+use_amp: false
+cudnn_benchmark: false
 cudnn_deterministic: false
 
 # For reproducibility

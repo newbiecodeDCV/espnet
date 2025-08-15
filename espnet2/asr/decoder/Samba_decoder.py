@@ -186,10 +186,6 @@ class SambaASRDecoder(AbsDecoder):
         """
         batch_size, max_len = ys_in_pad.size()
 
-        # Debug info
-        print(f"Input shapes: hs_pad={hs_pad.shape}, ys_in_pad={ys_in_pad.shape}")
-        print(f"hlens type={type(hlens)}, value={hlens}")
-        print(f"batch_size={batch_size}")
 
         # CRITICAL FIX: Ensure hlens is integer tensor
         if isinstance(hlens, int):
@@ -216,7 +212,7 @@ class SambaASRDecoder(AbsDecoder):
         if hlens.dtype != torch.long:
             hlens = hlens.long()
 
-        print(f"Fixed hlens type={type(hlens)}, dtype={hlens.dtype}, value={hlens}")
+
 
         # Create encoder attention mask - MANUAL CREATION to avoid make_pad_mask issues
         device = hlens.device
@@ -229,8 +225,7 @@ class SambaASRDecoder(AbsDecoder):
         ) >= hlens.unsqueeze(1)
         encoder_mask = encoder_mask.unsqueeze(1)  # Add attention head dimension
 
-        print(f"Manual encoder_mask shape: {encoder_mask.shape}")
-        print(f"Manual encoder_mask dtype: {encoder_mask.dtype}")
+
 
         # Create causal mask for decoder
         causal_mask = self.create_causal_mask(max_len, ys_in_pad.device)
