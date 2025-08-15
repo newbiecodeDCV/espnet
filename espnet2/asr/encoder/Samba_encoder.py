@@ -34,7 +34,10 @@ class MambaBlock(nn.Module):
         self.d_inner = int(self.expand * self.d_model)
         self.dt_rank = math.ceil(self.d_model / 16) if dt_rank is None else dt_rank
         self.pscan = pscan
-
+        self.dt_min = dt_min
+        self.dt_max = dt_max
+        self.dt_init = dt_init
+        self.dt_scale = dt_scale
         # FIXED: All required layers for ESPnet compatibility
 
         # 1. Input projection (combines x and z paths)
