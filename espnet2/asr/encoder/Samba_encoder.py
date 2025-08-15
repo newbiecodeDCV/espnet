@@ -60,10 +60,17 @@ class MambaBlock(nn.Module):
         # Initialize dt projection
         A = torch.arange(1, self.d_state + 1, dtype=torch.float32)
         A = A.repeat(self.d_inner, 1)
+        # Clamp A để tránh log(0) và giá trị quá lớn
+        A = torch.clamp(A, min=1e-4, max=1.0)  # KEY FIX
         self.A_log = nn.Parameter(torch.log(A))
+
+        # Hoặc khởi tạo trực tiếp A_log với giá trị nhỏ hơn
+        # self.A_log = nn.Parameter(torch.randn(self.d_inner, self.d_state) * 0.1)
+
         self.A_log._no_weight_decay = True
 
-        self.D = nn.Parameter(torch.ones(self.d_inner))
+        # FIXED: Initialize D with smaller values
+        self.D = nn.Parameter(torch.ones(self.d_inner) * 0.1)  # Thay vì 1.0
         self.D._no_weight_decay = True
 
         # Output projection
@@ -110,44 +117,63 @@ class MambaBlock(nn.Module):
         return out
 
     def selective_scan(self, u, delta, A, B, C, D):
+
         """
         Selective scan implementation - core of Mamba
         """
+
         batch, seq_len, d_inner = u.shape
         n = A.shape[-1]
 
-        # Discretize A and B
+        # FIXED: Clamp delta để tránh explosion
+        delta = torch.clamp(delta, min=-10, max=10)  # KEY FIX
+
+    # FIXED: Apply softplus để đảm bảo delta > 0
+        delta = F.softplus(delta)
+
+    # Discretize A and B với stability checks
         deltaA = torch.exp(delta.unsqueeze(-1) * A)  # (B, L, d_inner, d_state)
+
+    # FIXED: Clamp để tránh overflow
+        deltaA = torch.clamp(deltaA, max=100)  # KEY FIX
+
         deltaB_u = delta.unsqueeze(-1) * B.unsqueeze(2) * u.unsqueeze(-1)  # (B, L, d_inner, d_state)
 
-        # Parallel scan or sequential computation
-        if self.pscan and seq_len > 1:
-            x = self.parallel_scan(deltaA, deltaB_u)
-        else:
-            x = self.sequential_scan(deltaA, deltaB_u)
+    # FIXED: Clamp deltaB_u
+        deltaB_u = torch.clamp(deltaB_u, min=-100, max=100)  # KEY FIX
 
-        # Compute output
+    # Parallel scan or sequential computation
+        if self.pscan and seq_len > 1:
+           x = self.parallel_scan(deltaA, deltaB_u)
+        else:
+           x = self.sequential_scan(deltaA, deltaB_u)
+
+    # Compute output với stability check
         y = torch.einsum('blnd,bld->bln', x, C)
         y = y + u * D
 
+    # FIXED: Final clamp để tránh NaN
+        y = torch.clamp(y, min=-1000, max=1000)  # KEY FIX
         return y
 
-    def parallel_scan(self, A, Bu):
-        """Parallel scan implementation for efficiency"""
-        # Simplified parallel scan - in practice would use more optimized version
-        return self.sequential_scan(A, Bu)
 
-    def sequential_scan(self, A, Bu):
-        """Sequential scan implementation"""
-        batch, seq_len, d_inner, d_state = A.shape
-        x = torch.zeros(batch, d_inner, d_state, device=A.device, dtype=A.dtype)
-        xs = []
+def parallel_scan(self, A, Bu):
+    """Parallel scan implementation for efficiency"""
+    # Simplified parallel scan - in practice would use more optimized version
+    return self.sequential_scan(A, Bu)
 
-        for i in range(seq_len):
-            x = A[:, i] * x + Bu[:, i]
-            xs.append(x)
 
-        return torch.stack(xs, dim=1)  # (B, L, d_inner, d_state)
+def sequential_scan(self, A, Bu):
+    """Sequential scan implementation"""
+    batch, seq_len, d_inner, d_state = A.shape
+    x = torch.zeros(batch, d_inner, d_state, device=A.device, dtype=A.dtype)
+    xs = []
+
+    for i in range(seq_len):
+        x = A[:, i] * x + Bu[:, i]
+        xs.append(x)
+
+    return torch.stack(xs, dim=1)  # (B, L, d_inner, d_state)
 
 
 class SambaASREncoder(AbsEncoder):
