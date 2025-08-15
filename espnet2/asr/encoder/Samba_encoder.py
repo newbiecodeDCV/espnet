@@ -82,9 +82,9 @@ class MambaBlock(nn.Module):
         # Initialize dt_proj with small values
         with torch.no_grad():
             dt_init_std = self.dt_rank ** -0.5 * self.dt_scale
-            if dt_init == "constant":
+            if self.dt_init == "constant":
                 nn.init.constant_(self.dt_proj.weight, dt_init_std)
-            elif dt_init == "random":
+            elif self.dt_init == "random":
                 nn.init.uniform_(self.dt_proj.weight, -dt_init_std, dt_init_std)
 
         # Initialize output projection with small weights
