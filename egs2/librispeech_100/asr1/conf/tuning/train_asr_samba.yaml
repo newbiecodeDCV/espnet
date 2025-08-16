@@ -98,6 +98,5 @@ seed: 777
 num_iters_per_epoch: null
 log_level: INFO
 
-# FIXED: Add validation settings
-valid_interval: 1000         # Validate every 1000 iterations
+
 save_interval: 2000          # Save every 2000 iterations
