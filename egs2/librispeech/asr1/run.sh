@@ -13,7 +13,8 @@ asr_config=conf/train_asr_conformer.yaml
 lm_config=conf/tuning/train_lm_transformer2.yaml
 inference_config=conf/decode_asr.yaml
 
-./asr.sh \
+
+CUDA_VISIBLE_DEVICES=2./asr.sh \
     --lang en \
     --ngpu 4 \
     --nbpe 5000 \

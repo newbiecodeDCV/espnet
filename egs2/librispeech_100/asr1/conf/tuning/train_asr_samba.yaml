@@ -1,7 +1,7 @@
 encoder: samba_asr
 encoder_conf:
-  output_size: 512          # FIXED: Giảm từ 768 -> 512 để stability
-  num_layers: 6             # FIXED: Giảm từ 12 -> 6 layers ban đầu
+  output_size: 512
+  num_layers: 6
   d_state: 16
   d_conv: 4
   expand: 2
@@ -12,7 +12,7 @@ encoder_conf:
 
 decoder: samba_asr_decoder
 decoder_conf:
-  num_blocks: 4            # FIXED: Giảm từ 6 -> 4 blocks
+  num_blocks: 4
   d_state: 16
   d_conv: 4
   expand: 2
@@ -33,54 +33,52 @@ frontend_conf:
   fmin: 0
   fmax: 8000
 
-# FIXED: Optimization settings cho stability
+# FIXED: Optimization for ASR1
 optim: adamw
 optim_conf:
-  lr: 0.00005                # FIXED: Giảm LR từ 0.0001 -> 0.00005
-  betas: [ 0.9, 0.98 ]       # FIXED: Thay đổi beta2 từ 0.999 -> 0.98
-  eps: 1.0e-06               # FIXED: Tăng eps từ 1e-08 -> 1e-06
+  lr: 0.0002                 # FIXED: Tăng LR vì batch nhỏ
+  betas: [ 0.9, 0.98 ]
+  eps: 1.0e-06
   weight_decay: 0.01
 
-scheduler: warmuplr            # FIXED: Thay scheduler đơn giản hơn
+scheduler: warmuplr
 scheduler_conf:
-  warmup_steps: 1000
+  warmup_steps: 2000         # FIXED: Tăng warmup cho nhiều batches
 
-# FIXED: Training configuration cho stability
+# FIXED: Batch configuration for ASR1 + numel
 batch_type: numel
-batch_bins: 1000000
-accum_grad: 2                # FIXED: Tăng gradient accumulation
-grad_clip: 0.5               # FIXED: Giảm grad clip từ 1.0 -> 0.5
+batch_bins: 10000000         # FIXED: Tăng từ 1M -> 10M (ASR1 với numel cần lớn hơn)
+accum_grad: 1                # FIXED: Bỏ accumulation để faster iteration
+grad_clip: 1.0               # FIXED: Tăng grad clip
 grad_noise: false
 sort_in_batch: descending
 sort_batch: descending
-max_epoch: 80
+max_epoch: 50                # FIXED: Giảm epochs vì nhiều iterations/epoch
 
-
+# FIXED: Reduce augmentation overhead
 specaug: specaug
 specaug_conf:
-   apply_time_warp: true
-   time_warp_window: 5
-   time_warp_mode: bicubic
+   apply_time_warp: false    # FIXED: Tắt time warp cho speed
    apply_freq_mask: true
    freq_mask_width_range:
      - 0
-     - 30
-   num_freq_mask: 2
+     - 20                    # FIXED: Giảm mask size
+   num_freq_mask: 1
    apply_time_mask: true
    time_mask_width_range:
      - 0
-     - 40
-   num_time_mask: 2
+     - 30
+   num_time_mask: 1
 
-num_workers: 4
-log_interval: 10             # FIXED: Tăng tần suất log để theo dõi
-keep_nbest_models: 5         # FIXED: Giảm số models keep
+num_workers: 8               # FIXED: Tăng workers cho nhiều small batches
+log_interval: 100            # FIXED: Giảm log frequency
+keep_nbest_models: 3
 nbest_averaging_interval: 0
 
 token_type: char
 bpemodel: null
 
-patience: null
+patience: 10                 # FIXED: Early stopping
 early_stopping_criterion: validation
 best_model_criterion:
   - - valid
@@ -91,11 +89,15 @@ val_scheduler_criterion:
     - loss
     - min
 
-# FIXED: Bật mixed precision với stability
-use_amp: true                # FIXED: Thử bật AMP với Samba
-cudnn_benchmark: false
-cudnn_deterministic: true    # FIXED: Bật deterministic
+# FIXED: Optimize for speed
+use_amp: true
+cudnn_benchmark: true        # FIXED: Enable benchmark
+cudnn_deterministic: false   # FIXED: Disable for speed
 
 seed: 777
 num_iters_per_epoch: null
 log_level: INFO
+
+# FIXED: Add validation settings
+valid_interval: 1000         # Validate every 1000 iterations
+save_interval: 2000          # Save every 2000 iterations
