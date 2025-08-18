@@ -43,19 +43,19 @@ optim_conf:
 
 scheduler: warmuplr
 scheduler_conf:
-  warmup_steps: 2000         # FIXED: Tăng warmup cho nhiều batches
+  warmup_steps: 2000
 
-# FIXED: Batch configuration for ASR1 + numel
+
 batch_type: numel
-batch_bins: 10000000         # FIXED: Tăng từ 1M -> 10M (ASR1 với numel cần lớn hơn)
-accum_grad: 1                # FIXED: Bỏ accumulation để faster iteration
-grad_clip: 1.0               # FIXED: Tăng grad clip
+batch_bins: 10000000
+accum_grad: 1
+grad_clip: 1.0
 grad_noise: false
 sort_in_batch: descending
 sort_batch: descending
-max_epoch: 50                # FIXED: Giảm epochs vì nhiều iterations/epoch
+max_epoch: 50
 
-# FIXED: Reduce augmentation overhead
+
 specaug: specaug
 specaug_conf:
    apply_time_warp: false    # FIXED: Tắt time warp cho speed
@@ -78,7 +78,7 @@ nbest_averaging_interval: 0
 token_type: char
 bpemodel: null
 
-patience: 10                 # FIXED: Early stopping
+patience: 10
 early_stopping_criterion: validation
 best_model_criterion:
   - - valid
@@ -92,11 +92,11 @@ val_scheduler_criterion:
 # FIXED: Optimize for speed
 use_amp: true
 cudnn_benchmark: true        # FIXED: Enable benchmark
-cudnn_deterministic: false   # FIXED: Disable for speed
+cudnn_deterministic: false   # FIX
 
 seed: 777
 num_iters_per_epoch: null
 log_level: INFO
 
 
-save_interval: 2000          # Save every 2000 iterations
+save_interval: 2000
