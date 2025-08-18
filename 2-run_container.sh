@@ -80,4 +80,4 @@ echo "Executing application in Docker"
 echo ${cmd}
 eval ${cmd}
 
-echo "`basename $0` done."
+echo "$(basename "$0") done."
