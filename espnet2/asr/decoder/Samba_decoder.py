@@ -263,7 +263,7 @@ class SambaASRDecoder(AbsDecoder):
             cache: Optional[List[torch.Tensor]] = None,
     ) -> Tuple[torch.Tensor, List[torch.Tensor]]:
         """
-        Forward one step for autoregressive decoding
+        Forward one step for autoregressive decoding with batch size handling
 
         Args:
             hs_pad: encoder output (B, T, D)
@@ -272,12 +272,11 @@ class SambaASRDecoder(AbsDecoder):
             cache: previous states cache
 
         Returns:
-            logits: next token logits (B, vocab_size)
+            logits: next token logits ([vocab_size] if B=1 else [B, vocab_size])
             new_cache: updated cache
         """
-        # CRITICAL FIX: Handle different ys tensor shapes
+        # Ensure ys has batch dimension
         if ys.dim() == 1:
-            # If ys is 1D, unsqueeze to make it 2D (1, L)
             ys = ys.unsqueeze(0)
             batch_size = 1
         elif ys.dim() == 2:
@@ -285,44 +284,35 @@ class SambaASRDecoder(AbsDecoder):
         else:
             raise ValueError(f"Unexpected ys dimension: {ys.dim()}, shape: {ys.shape}")
 
-        # CRITICAL FIX: Ensure hlens is properly formatted
+        # Process hlens
         if isinstance(hlens, int):
-            hlens = torch.full((batch_size,), hlens,
-                               dtype=torch.long, device=ys.device)
+            hlens = torch.full((batch_size,), hlens, dtype=torch.long, device=ys.device)
         elif hlens is None:
-            hlens = torch.full((batch_size,), hs_pad.size(1),
-                               dtype=torch.long, device=ys.device)
+            hlens = torch.full((batch_size,), hs_pad.size(1), dtype=torch.long, device=ys.device)
         elif torch.is_tensor(hlens):
-            # Convert to long tensor - KEY FIX
             hlens = hlens.long()
             if hlens.dim() == 0:
                 hlens = hlens.unsqueeze(0).repeat(batch_size)
             elif hlens.size(0) != batch_size:
                 hlens = hlens[0].unsqueeze(0).repeat(batch_size)
         else:
-            # Handle list or other iterables
             hlens = torch.tensor(hlens, dtype=torch.long, device=ys.device)
             if hlens.size(0) != batch_size:
                 hlens = hlens[0].unsqueeze(0).repeat(batch_size)
 
-        # CRITICAL FIX: Create ys_in_lens with correct format and safe dimension access
-        if ys.dim() >= 2:
-            seq_len = ys.size(1)
-        else:
-            seq_len = ys.size(0)
+        # Prepare ys_in_lens
+        seq_len = ys.size(1) if ys.dim() >= 2 else ys.size(0)
+        ys_in_lens = torch.full((batch_size,), seq_len, dtype=torch.long, device=ys.device)
 
-        ys_in_lens = torch.full((batch_size,), seq_len,
-                                dtype=torch.long, device=ys.device)
-
-        # Ensure hs_pad has correct batch dimension
+        # Ensure hs_pad matches batch size
         if hs_pad.size(0) != batch_size:
-            # Repeat encoder output to match batch size
             hs_pad = hs_pad.repeat(batch_size, 1, 1)
 
+        # Forward pass through decoder
         logits, _ = self.forward(hs_pad, hlens, ys, ys_in_lens)
 
-        # Return logits for last position
-        return logits[:, -1, :], cache
+        # Extract last step logits
+        logits_last = logits[:, -1, :]  # [B, vocab_size]
 
     def score(self, ys, state, x):
         """Compatibility method for beam search"""
