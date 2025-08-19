@@ -354,7 +354,7 @@ class BeamSearch(torch.nn.Module):
                     score = scores[k]
 
                 weighted_scores += weight * score
-                weighted_scores += self.weights[k] * scores[k]
+
                 # partial scoring
             if self.do_pre_beam:
                 pre_beam_scores = (
