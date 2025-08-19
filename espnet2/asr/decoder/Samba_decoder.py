@@ -314,6 +314,12 @@ class SambaASRDecoder(AbsDecoder):
         # Extract last step logits
         logits_last = logits[:, -1, :]  # [B, vocab_size]
 
+        # If batch=1, squeeze to [vocab_size] for beam search
+        if logits_last.size(0) == 1:
+            logits_last = logits_last.squeeze(0)
+
+        return logits_last, cache
+
     def score(self, ys, state, x):
         """Compatibility method for beam search"""
         # Add debugging
