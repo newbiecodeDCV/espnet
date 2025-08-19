@@ -186,7 +186,6 @@ class SambaASRDecoder(AbsDecoder):
         """
         batch_size, max_len = ys_in_pad.size()
 
-
         # CRITICAL FIX: Ensure hlens is integer tensor
         if isinstance(hlens, int):
             # If hlens is int, create tensor with correct batch_size
@@ -212,8 +211,6 @@ class SambaASRDecoder(AbsDecoder):
         if hlens.dtype != torch.long:
             hlens = hlens.long()
 
-
-
         # Create encoder attention mask - MANUAL CREATION to avoid make_pad_mask issues
         device = hlens.device
         max_len = hs_pad.size(1)
@@ -224,8 +221,6 @@ class SambaASRDecoder(AbsDecoder):
             batch_size, max_len
         ) >= hlens.unsqueeze(1)
         encoder_mask = encoder_mask.unsqueeze(1)  # Add attention head dimension
-
-
 
         # Create causal mask for decoder
         causal_mask = self.create_causal_mask(max_len, ys_in_pad.device)
@@ -273,14 +268,22 @@ class SambaASRDecoder(AbsDecoder):
         Args:
             hs_pad: encoder output (B, T, D)
             hlens: encoder lengths (B,)
-            ys: current token sequence (B, L)
+            ys: current token sequence (B, L) or (L,)
             cache: previous states cache
 
         Returns:
             logits: next token logits (B, vocab_size)
             new_cache: updated cache
         """
-        batch_size = ys.size(0)
+        # CRITICAL FIX: Handle different ys tensor shapes
+        if ys.dim() == 1:
+            # If ys is 1D, unsqueeze to make it 2D (1, L)
+            ys = ys.unsqueeze(0)
+            batch_size = 1
+        elif ys.dim() == 2:
+            batch_size = ys.size(0)
+        else:
+            raise ValueError(f"Unexpected ys dimension: {ys.dim()}, shape: {ys.shape}")
 
         # CRITICAL FIX: Ensure hlens is properly formatted
         if isinstance(hlens, int):
@@ -296,10 +299,25 @@ class SambaASRDecoder(AbsDecoder):
                 hlens = hlens.unsqueeze(0).repeat(batch_size)
             elif hlens.size(0) != batch_size:
                 hlens = hlens[0].unsqueeze(0).repeat(batch_size)
+        else:
+            # Handle list or other iterables
+            hlens = torch.tensor(hlens, dtype=torch.long, device=ys.device)
+            if hlens.size(0) != batch_size:
+                hlens = hlens[0].unsqueeze(0).repeat(batch_size)
 
-        # Create ys_in_lens with correct format
-        ys_in_lens = torch.full((batch_size,), ys.size(1),
+        # CRITICAL FIX: Create ys_in_lens with correct format and safe dimension access
+        if ys.dim() >= 2:
+            seq_len = ys.size(1)
+        else:
+            seq_len = ys.size(0)
+
+        ys_in_lens = torch.full((batch_size,), seq_len,
                                 dtype=torch.long, device=ys.device)
+
+        # Ensure hs_pad has correct batch dimension
+        if hs_pad.size(0) != batch_size:
+            # Repeat encoder output to match batch size
+            hs_pad = hs_pad.repeat(batch_size, 1, 1)
 
         logits, _ = self.forward(hs_pad, hlens, ys, ys_in_lens)
 
@@ -308,8 +326,19 @@ class SambaASRDecoder(AbsDecoder):
 
     def score(self, ys, state, x):
         """Compatibility method for beam search"""
-        logits, _ = self.forward_one_step(x, None, ys, state)
-        return logits, state
+        # Add debugging
+        print(f"DEBUG score(): ys.shape = {ys.shape}, ys.dim() = {ys.dim()}")
+        print(f"DEBUG score(): x.shape = {x.shape}")
+
+        try:
+            logits, _ = self.forward_one_step(x, None, ys, state)
+            return logits, state
+        except Exception as e:
+            print(f"ERROR in score(): {e}")
+            print(f"ys: {ys}")
+            print(f"ys.shape: {ys.shape}")
+            print(f"x.shape: {x.shape}")
+            raise
 
 
 # Import MambaBlock from encoder file
