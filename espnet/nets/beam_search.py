@@ -342,8 +342,9 @@ class BeamSearch(torch.nn.Module):
             else:
                 scores, states = self.score_full(hyp, x, pre_x=pre_x)
             for k in self.full_scorers:
-                weighted_scores += self.weights[k].squeeze(0) * scores[k]
-            # partial scoring
+                weighted_scores = weighted_scores.view(-1)  # nếu weighted_scores có shape [1,5000]
+                weighted_scores += self.weights[k] * scores[k]
+                # partial scoring
             if self.do_pre_beam:
                 pre_beam_scores = (
                     weighted_scores
