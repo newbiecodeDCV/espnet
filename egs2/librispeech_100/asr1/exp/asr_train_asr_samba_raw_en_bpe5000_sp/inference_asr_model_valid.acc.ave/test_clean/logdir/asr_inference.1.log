@@ -1,0 +1,37 @@
+# python3 -m espnet2.bin.asr_inference --batch_size 1 --ngpu 1 --data_path_and_name_and_type dump/raw/test_clean/wav.scp,speech,kaldi_ark --key_file exp/asr_train_asr_samba_raw_en_bpe5000_sp/inference_asr_model_valid.acc.ave/test_clean/logdir/keys.1.scp --asr_train_config exp/asr_train_asr_samba_raw_en_bpe5000_sp/config.yaml --asr_model_file exp/asr_train_asr_samba_raw_en_bpe5000_sp/valid.acc.ave.pth --output_dir exp/asr_train_asr_samba_raw_en_bpe5000_sp/inference_asr_model_valid.acc.ave/test_clean/logdir/output.1 
+# Started at Tue Aug 19 07:28:02 UTC 2025
+#
+/espnet/espnet2/enh/encoder/stft_encoder.py:79: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @torch.cuda.amp.autocast(enabled=False)
+/espnet/espnet2/enh/layers/uses2_swin.py:329: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @torch.cuda.amp.autocast(enabled=False)
+/home/asr/.conda/envs/espnet/bin/python3 /espnet/espnet2/bin/asr_inference.py --batch_size 1 --ngpu 1 --data_path_and_name_and_type dump/raw/test_clean/wav.scp,speech,kaldi_ark --key_file exp/asr_train_asr_samba_raw_en_bpe5000_sp/inference_asr_model_valid.acc.ave/test_clean/logdir/keys.1.scp --asr_train_config exp/asr_train_asr_samba_raw_en_bpe5000_sp/config.yaml --asr_model_file exp/asr_train_asr_samba_raw_en_bpe5000_sp/valid.acc.ave.pth --output_dir exp/asr_train_asr_samba_raw_en_bpe5000_sp/inference_asr_model_valid.acc.ave/test_clean/logdir/output.1
+2025-08-19 07:28:22,260 (abs_task:2327) INFO: config file: exp/asr_train_asr_samba_raw_en_bpe5000_sp/config.yaml
+2025-08-19 07:28:22,492 (asr:540) INFO: Vocabulary size: 5000
+Traceback (most recent call last):
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/espnet/espnet2/bin/asr_inference.py", line 1184, in <module>
+    main()
+  File "/espnet/espnet2/bin/asr_inference.py", line 1180, in main
+    inference(**kwargs)
+  File "/espnet/espnet2/bin/asr_inference.py", line 823, in inference
+    speech2text = Speech2Text.from_pretrained(
+  File "/espnet/espnet2/bin/asr_inference.py", line 711, in from_pretrained
+    return Speech2Text(**kwargs)
+  File "/espnet/espnet2/bin/asr_inference.py", line 147, in __init__
+    asr_model, asr_train_args = task.build_model_from_file(
+  File "/espnet/espnet2/tasks/abs_task.py", line 2349, in build_model_from_file
+    state_dict = torch.load(
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/site-packages/torch/serialization.py", line 1425, in load
+    with _open_file_like(f, "rb") as opened_file:
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/site-packages/torch/serialization.py", line 751, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/site-packages/torch/serialization.py", line 732, in __init__
+    super().__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: 'exp/asr_train_asr_samba_raw_en_bpe5000_sp/valid.acc.ave.pth'
+Failed to import Flash Attention, using ESPnet default: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found (required by /home/asr/.conda/envs/espnet/lib/python3.10/site-packages/flash_attn_2_cuda.cpython-310-x86_64-linux-gnu.so)
+# Accounting: time=24 threads=1
+# Ended (code 1) at Tue Aug 19 07:28:26 UTC 2025, elapsed time 24 seconds
