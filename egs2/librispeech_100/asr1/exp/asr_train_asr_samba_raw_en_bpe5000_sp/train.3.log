@@ -1,0 +1,28 @@
+# python3 -m espnet2.bin.asr_train --use_preprocessor true --bpemodel data/en_token_list/bpe_unigram5000/bpe.model --token_type bpe --token_list data/en_token_list/bpe_unigram5000/tokens.txt --non_linguistic_symbols none --cleaner none --g2p none --valid_data_path_and_name_and_type dump/raw/dev/wav.scp,speech,kaldi_ark --valid_shape_file exp/asr_stats_raw_en_bpe5000_sp/valid/speech_shape --resume true --ignore_init_mismatch false --fold_length 80000 --output_dir exp/asr_train_asr_samba_raw_en_bpe5000_sp --config conf/tuning/train_asr_samba.yaml --frontend_conf fs=16k --normalize=global_mvn --normalize_conf stats_file=exp/asr_stats_raw_en_bpe5000_sp/train/feats_stats.npz --train_data_path_and_name_and_type dump/raw/train_clean_100_sp/wav.scp,speech,kaldi_ark --train_shape_file exp/asr_stats_raw_en_bpe5000_sp/train/speech_shape --fold_length 150 --train_data_path_and_name_and_type dump/raw/train_clean_100_sp/text,text,text --train_shape_file exp/asr_stats_raw_en_bpe5000_sp/train/text_shape.bpe --valid_data_path_and_name_and_type dump/raw/dev/text,text,text --valid_shape_file exp/asr_stats_raw_en_bpe5000_sp/valid/text_shape.bpe --ngpu 1 --multiprocessing_distributed True 
+# Started at Mon Aug 18 09:51:05 UTC 2025
+#
+/home/asr/.conda/envs/espnet/bin/python3 /espnet/espnet2/bin/asr_train.py --use_preprocessor true --bpemodel data/en_token_list/bpe_unigram5000/bpe.model --token_type bpe --token_list data/en_token_list/bpe_unigram5000/tokens.txt --non_linguistic_symbols none --cleaner none --g2p none --valid_data_path_and_name_and_type dump/raw/dev/wav.scp,speech,kaldi_ark --valid_shape_file exp/asr_stats_raw_en_bpe5000_sp/valid/speech_shape --resume true --ignore_init_mismatch false --fold_length 80000 --output_dir exp/asr_train_asr_samba_raw_en_bpe5000_sp --config conf/tuning/train_asr_samba.yaml --frontend_conf fs=16k --normalize=global_mvn --normalize_conf stats_file=exp/asr_stats_raw_en_bpe5000_sp/train/feats_stats.npz --train_data_path_and_name_and_type dump/raw/train_clean_100_sp/wav.scp,speech,kaldi_ark --train_shape_file exp/asr_stats_raw_en_bpe5000_sp/train/speech_shape --fold_length 150 --train_data_path_and_name_and_type dump/raw/train_clean_100_sp/text,text,text --train_shape_file exp/asr_stats_raw_en_bpe5000_sp/train/text_shape.bpe --valid_data_path_and_name_and_type dump/raw/dev/text,text,text --valid_shape_file exp/asr_stats_raw_en_bpe5000_sp/valid/text_shape.bpe --ngpu 1 --multiprocessing_distributed True
+[lotus-sys-gpu-33-17] 2025-08-18 09:51:16,499 (asr:540) INFO: Vocabulary size: 5000
+Traceback (most recent call last):
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/espnet/espnet2/bin/asr_train.py", line 23, in <module>
+    main()
+  File "/espnet/espnet2/bin/asr_train.py", line 19, in main
+    ASRTask.main(cmd=cmd)
+  File "/espnet/espnet2/tasks/abs_task.py", line 1227, in main
+    cls.main_worker(args)
+  File "/espnet/espnet2/tasks/abs_task.py", line 1359, in main_worker
+    model = cls.build_model(args=args)
+  File "/espnet/espnet2/tasks/asr.py", line 565, in build_model
+    normalize = normalize_class(**args.normalize_conf)
+  File "/espnet/espnet2/layers/global_mvn.py", line 40, in __init__
+    stats = np.load(stats_file)
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/site-packages/numpy/lib/npyio.py", line 405, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: 'exp/asr_stats_raw_en_bpe5000_sp/train/feats_stats.npz'
+Failed to import Flash Attention, using ESPnet default: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found (required by /home/asr/.conda/envs/espnet/lib/python3.10/site-packages/flash_attn_2_cuda.cpython-310-x86_64-linux-gnu.so)
+# Accounting: time=11 threads=1
+# Ended (code 1) at Mon Aug 18 09:51:17 UTC 2025, elapsed time 11 seconds

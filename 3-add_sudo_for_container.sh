@@ -1,42 +1,37 @@
 #!/bin/bash
 
-# ==============================================
-# Docker Image Builder with User Context
-#
-# This script automates the process of building a Docker image while preserving
-# the current user's context (username, UID, GID) as build arguments.
-#
-# It performs three main steps:
-#   1. Displays current user information
-#   2. Creates a modified Dockerfile with user context as build arguments
-#   3. Builds the Docker image using the modified Dockerfile
-#
-# Usage:
-#   ./script.sh  # Make sure the original Dockerfile exists in the same directory
-# ==============================================
+# Script: add_sudo_for_user_asr.sh
+# Description: This script adds sudo privileges for user 'asr' in a specified Docker container.
+#              It first checks if a container ID/name is provided as argument.
+#              If no argument is provided, it displays usage instructions and lists running containers.
+# Usage: bash add_sudo_for_user_asr.sh [container_id_or_name]
 
-# Display current user information
-echo "=======GET USER INFO========"
-echo "+ username: $(id -nu)"
-echo "+ user_id: $(id -nu | id -u)"
-echo "+ group_id: $(id -ng | id -g)"
-echo "============================"
+# Check if container ID/name argument is provided
+if [ -z "$1" ]; then
+    # Display usage instructions if no argument is provided
+    echo "==========================================================================================="
+    echo "Error: Container ID/name must not be empty!"
+    echo "Usage: bash add_sudo_for_user_asr.sh [container_id_or_name]"
+    echo "=====================================LIST CONTAINER========================================"
 
-# Create a new Dockerfile with user context as build arguments
-# Strategy:
-# 1. Keep first 3 lines of original Dockerfile
-# 2. Add ARG lines for USER, UID, GID
-# 3. Append remaining lines from original Dockerfile (starting from line 4)
-head -n 3 Dockerfile > Dockerfile.new
-echo "ARG USER=`id -nu`" >> Dockerfile.new
-echo "ARG UID=`id -nu|id -u`" >> Dockerfile.new
-echo "ARG GID=`id -ng|id -g`" >> Dockerfile.new
-tail -n +4 Dockerfile >> Dockerfile.new
+    # List all running Docker containers to help user identify the correct container
+    docker ps
 
-# Build the Docker image using the modified Dockerfile
-echo "======BUILD DOCKER IMAGE======"
-docker build -f Dockerfile.new . -t "nvcr.io/nvidia/cuda:12.8.0-runtime-ubuntu22.04"
-# docker build -f Dockerfile.new . -t "nvcr.io/nvidia/pytorch:20.12-py3-asr"
+    echo "==========================================================================================="
+else
+    # If container ID/name is provided, proceed with setting up sudo for user 'asr'
+    echo "Setting up sudo for user 'asr' in Docker container: $1 ..."
 
-# Clean up - remove the temporary Dockerfile
-rm -v Dockerfile.new
+    # Execute commands inside the container as root to:
+    # 1. Add 'asr' user to sudoers file
+    # 2. Update package lists
+    # 3. Install sudo package (if not already installed)
+    docker exec -it --user root $1 /bin/bash -c "echo '%asr ALL=(ALL:ALL) ALL'>>/etc/sudoers && apt update && apt install sudo"
+
+    # Display completion message
+    echo "Done. User 'asr' now has sudo privileges in container: $1"
+    echo "Attaching to container: $1"
+
+    # Attach to the container after setup
+    docker attach "$1"
+fi

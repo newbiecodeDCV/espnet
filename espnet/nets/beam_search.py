@@ -342,8 +342,20 @@ class BeamSearch(torch.nn.Module):
             else:
                 scores, states = self.score_full(hyp, x, pre_x=pre_x)
             for k in self.full_scorers:
-                weighted_scores += self.weights[k] * scores[k]
-            # partial scoring
+                if self.weights[k].dim() == 2 and self.weights[k].shape[0] == 1:
+                    weight = self.weights[k].squeeze(0)
+                else:
+                    weight = self.weights[k]
+
+                # Đảm bảo scores cũng là 1D
+                if scores[k].dim() == 2 and scores[k].shape[0] == 1:
+                    score = scores[k].squeeze(0)
+                else:
+                    score = scores[k]
+
+                weighted_scores += weight * score
+
+                # partial scoring
             if self.do_pre_beam:
                 pre_beam_scores = (
                     weighted_scores

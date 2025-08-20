@@ -47,7 +47,7 @@ scheduler_conf:
 
 
 batch_type: numel
-batch_bins: 10000000
+batch_bins: 5000000
 accum_grad: 1
 grad_clip: 1.0
 grad_noise: false
@@ -99,4 +99,4 @@ num_iters_per_epoch: null
 log_level: INFO
 
 
-save_interval: 2000
+#save_interval: 2000

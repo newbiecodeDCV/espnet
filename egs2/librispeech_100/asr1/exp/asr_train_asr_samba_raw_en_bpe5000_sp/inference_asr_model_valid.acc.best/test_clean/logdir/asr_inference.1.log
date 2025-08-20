@@ -1,0 +1,90 @@
+# python3 -m espnet2.bin.asr_inference --batch_size 1 --ngpu 1 --data_path_and_name_and_type dump/raw/test_clean/wav.scp,speech,kaldi_ark --key_file exp/asr_train_asr_samba_raw_en_bpe5000_sp/inference_asr_model_valid.acc.best/test_clean/logdir/keys.1.scp --asr_train_config exp/asr_train_asr_samba_raw_en_bpe5000_sp/config.yaml --asr_model_file exp/asr_train_asr_samba_raw_en_bpe5000_sp/valid.acc.best.pth --output_dir exp/asr_train_asr_samba_raw_en_bpe5000_sp/inference_asr_model_valid.acc.best/test_clean/logdir/output.1 
+# Started at Tue Aug 19 08:46:10 UTC 2025
+#
+/espnet/espnet2/enh/encoder/stft_encoder.py:79: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @torch.cuda.amp.autocast(enabled=False)
+/espnet/espnet2/enh/layers/uses2_swin.py:329: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @torch.cuda.amp.autocast(enabled=False)
+/home/asr/.conda/envs/espnet/bin/python3 /espnet/espnet2/bin/asr_inference.py --batch_size 1 --ngpu 1 --data_path_and_name_and_type dump/raw/test_clean/wav.scp,speech,kaldi_ark --key_file exp/asr_train_asr_samba_raw_en_bpe5000_sp/inference_asr_model_valid.acc.best/test_clean/logdir/keys.1.scp --asr_train_config exp/asr_train_asr_samba_raw_en_bpe5000_sp/config.yaml --asr_model_file exp/asr_train_asr_samba_raw_en_bpe5000_sp/valid.acc.best.pth --output_dir exp/asr_train_asr_samba_raw_en_bpe5000_sp/inference_asr_model_valid.acc.best/test_clean/logdir/output.1
+2025-08-19 08:46:22,199 (abs_task:2327) INFO: config file: exp/asr_train_asr_samba_raw_en_bpe5000_sp/config.yaml
+2025-08-19 08:46:22,448 (asr:540) INFO: Vocabulary size: 5000
+2025-08-19 08:46:23,250 (asr_inference:387) WARNING: As non-batch scorers ['decoder'] are found, fall back to non-batch implementation.
+2025-08-19 08:46:23,253 (asr_inference:396) INFO: Beam_search: BeamSearch(
+  (nn_dict): ModuleDict(
+    (decoder): SambaASRDecoder(
+      (embed): Sequential(
+        (0): Embedding(5000, 512)
+        (1): PositionalEncoding(
+          (dropout): Dropout(p=0.1, inplace=False)
+        )
+      )
+      (decoders): ModuleList(
+        (0-3): 4 x MambaCrossBlock(
+          (self_mamba): MambaBlock(
+            (in_proj): Linear(in_features=512, out_features=2048, bias=False)
+            (conv1d): Conv1d(1024, 1024, kernel_size=(4,), stride=(1,), padding=(3,), groups=1024)
+            (act): SiLU()
+            (x_proj): Linear(in_features=1024, out_features=64, bias=False)
+            (dt_proj): Linear(in_features=32, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=512, bias=False)
+          )
+          (cross_attention): MultiheadAttention(
+            (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          )
+          (cross_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (norm1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (norm2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (ffn): Sequential(
+            (0): Linear(in_features=512, out_features=2048, bias=True)
+            (1): ReLU()
+            (2): Dropout(p=0.1, inplace=False)
+            (3): Linear(in_features=2048, out_features=512, bias=True)
+            (4): Dropout(p=0.1, inplace=False)
+          )
+        )
+      )
+      (output_layer): Linear(in_features=512, out_features=5000, bias=True)
+      (after_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+)
+2025-08-19 08:46:23,253 (asr_inference:397) INFO: Decoding device=cuda, dtype=float32
+2025-08-19 08:46:23,255 (asr_inference:475) INFO: Text tokenizer: SentencepiecesTokenizer(model="data/en_token_list/bpe_unigram5000/bpe.model")
+2025-08-19 08:46:23,257 (asr:512) INFO: Optional Data Names: ('text_spk2', 'text_spk3', 'text_spk4', 'prompt')
+Failed to import Flash Attention, using ESPnet default: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found (required by /home/asr/.conda/envs/espnet/lib/python3.10/site-packages/flash_attn_2_cuda.cpython-310-x86_64-linux-gnu.so)
+2025-08-19 08:46:23,295 (asr_inference:522) INFO: speech length: 166960
+/espnet/espnet2/asr/espnet_model.py:402: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(self.autocast_frontend, dtype=autocast_type):
+2025-08-19 08:46:23,998 (beam_search:440) INFO: decoder input length: 261
+2025-08-19 08:46:23,998 (beam_search:441) INFO: max output length: 261
+2025-08-19 08:46:23,998 (beam_search:442) INFO: min output length: 0
+Traceback (most recent call last):
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/espnet/espnet2/bin/asr_inference.py", line 1184, in <module>
+    main()
+  File "/espnet/espnet2/bin/asr_inference.py", line 1180, in main
+    inference(**kwargs)
+  File "/espnet/espnet2/bin/asr_inference.py", line 853, in inference
+    results = speech2text(**batch)
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/espnet/espnet2/bin/asr_inference.py", line 559, in __call__
+    results = self._decode_single_sample(enc[0])
+  File "/espnet/espnet2/bin/asr_inference.py", line 652, in _decode_single_sample
+    nbest_hyps = self.beam_search(
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/asr/.conda/envs/espnet/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/espnet/espnet/nets/beam_search.py", line 449, in forward
+    best = self.search(running_hyps, x, pre_x=pre_x)
+  File "/espnet/espnet/nets/beam_search.py", line 345, in search
+    if self.weights[k].dim() == 2 and self.weights[k].shape[0] == 1:
+AttributeError: 'float' object has no attribute 'dim'
+DEBUG score(): ys.shape = torch.Size([1]), ys.dim() = 1
+DEBUG score(): x.shape = torch.Size([261, 512])
+# Accounting: time=15 threads=1
+# Ended (code 1) at Tue Aug 19 08:46:25 UTC 2025, elapsed time 15 seconds
